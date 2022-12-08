@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+from tabulate import tabulate
 
 ip = "10.0.0.93"
 startTime = 1670371200
@@ -38,19 +39,28 @@ def requestData(ip, startTime,endTime):
 
 
 #sort data
-def sortBits(list):
-    return(list.sort())
+
+
 def get95perc(sortedList):
+    sortedList.sort()
     index = int(round(len(sortedList)*0.95, 0))
     return sortedList[index]
+
+def get98perc(sortedList):
+    sortedList.sort()
+    index = int(round(len(sortedList)*0.98, 0))
+    return sortedList[index]
+
+
 if (__name__ == "__main__"):
     # print(bitsOut)
 
     requestData(ip,startTime,endTime)
-    sortBits(bitsIn)
-    sortBits(bitsOut)
+    # sortBits(bitsIn)
+    # sortBits(bitsOut)
 
     print(get95perc(bitsIn)/10**9)
+    print(get98perc(bitsIn)/10**9)
 
 
 
