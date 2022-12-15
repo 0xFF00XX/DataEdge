@@ -3,7 +3,13 @@ import os
 import json
 from tabulate import tabulate
 
+# TODO:
+#set days. Get data for end of day, biginning of day and in between
+
+
+
 ip = "10.0.0.93"
+
 startTime = 1670371200
 endTime = 1670457600
 url = "http://"+ip+":8581/odata/api/groups?$top=50&$skip=0&top=288&&resolution=RATE&starttime="+str(startTime)+"&endtime="+str(endTime)+"&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/im_BitsIn,portmfs/im_BitsOut&$filter=((Name eq 'DEL_98_Test'))"
