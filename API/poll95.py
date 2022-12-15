@@ -119,10 +119,10 @@ if (__name__ == "__main__"):
     print()
     print("BitsIn 95 percent")
     print(get95perc(bitsIn)/10**9)
-    # print(get98perc(bitsIn)/10**9)
-    for i in timeStamp:
-        if (timeStamp.count(i) > 0):
-            print(i)
+    # # print(get98perc(bitsIn)/10**9)
+    # for i in timeStamp:
+    #     if (timeStamp.count(i) > 0):
+    #         print(i)
 
 
 

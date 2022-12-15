@@ -8,7 +8,8 @@ Pulls data for each day within specified range via separate requests and calcula
 Gets 95 percent specifically from CABI to match results as they may differ.
 
 TODO: 
-- aquire date, parse into epoch, poll data in specified time range
-- request 95 perc from odata
-- request details like ip, start time, end time from user, group name from user
-- 
+- [x] aquire date, parse into epoch, poll data in specified time range
+	- [ ] more testing required.
+- [ ] request 95 perc from odata directly
+- [ ] request details like ip, start time, end time from user, group name from user
+- [ ] prettify output using tabulate
