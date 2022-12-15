@@ -12,4 +12,4 @@ TODO:
 	- [ ] more testing required.
 - [ ] request 95 perc from odata directly
 - [ ] request details like ip, start time, end time from user, group name from user
-- [ ] prettify output using tabulate
+- [ ] prettify output using `tabulate`

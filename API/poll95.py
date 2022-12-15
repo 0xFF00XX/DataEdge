@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+from datetime import datetime, timezone
 from tabulate import tabulate
 
 # TODO:
@@ -111,6 +112,9 @@ if (__name__ == "__main__"):
     # requestData(startTime, endTime, numberOfEntries)
     # sortBits(bitsIn)
     # sortBits(bitsOut)
+    print("Start Time")
+    print(datetime.fromtimestamp(int(timeStamp[0])).strftime('%Y-%m-%d %H:%M:%S'))
+    print()
     print("BitsIn max")
     print(max(bitsIn)/10**9)
     print()
@@ -119,6 +123,10 @@ if (__name__ == "__main__"):
     print()
     print("BitsIn 95 percent")
     print(get95perc(bitsIn)/10**9)
+    print("End Time")
+    print()
+    print(datetime.fromtimestamp(int(timeStamp[-1])).strftime('%Y-%m-%d %H:%M:%S'))
+    print()
     # # print(get98perc(bitsIn)/10**9)
     # for i in timeStamp:
     #     if (timeStamp.count(i) > 0):
