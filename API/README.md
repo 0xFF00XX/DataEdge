@@ -10,7 +10,7 @@ Gets 95 percent specifically from CABI to match results as they may differ.
 TODO: 
 |    JS     | Python|
 | --------- | -----:|
-| - [x] aquire date, parse into epoch, poll data in specified time range| $1600 |
+| `- [x]` aquire date, parse into epoch, poll data in specified time range| $1600 |
 | Phone     |   $12 |
 | Pipe      |    $1 |
 
