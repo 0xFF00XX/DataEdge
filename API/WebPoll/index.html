@@ -1,15 +1,43 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <link rel="stylesheet" href="/css/master.css">
-    <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
-    <div class="input">
-    </div>
-    <div class="output">
+<html lang="en">
+<head>
+  <script src="../poll95.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    </div>
-  </body>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <div class="main">
+
+
+    <form action="" class="form">
+      <!-- <title>Home</title> -->
+        <label for="ip">IP:</label>
+        <input type="text" title="ip">
+
+        <label for="group">Group Name:</label>
+        <input type="text" title="group-name" id="group">
+
+        <label for="time">Time Range:</label>
+        <select name="menu" id="time" title="time-range" class="menu">
+            <option value="first">Last Hour</option>
+            <option value="second">Second</option>
+        </select>
+
+        <div class="time-range">
+            <label for="start-time">Start time:</label>
+            <input type="datetime-local" id="start-time"
+                   name="meeting-time" value="2022-10-12T00:00">
+
+            <label for="end-time">End time:</label>
+            <input type="datetime-local" id="end-time"
+                   name="meeting-time" value="2022-10-12T00:00">
+        </div>
+        <button class="submit">Submit</button>
+    </form>
+  </div>
+
+</body>
 </html>
