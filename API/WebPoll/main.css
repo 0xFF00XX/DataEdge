@@ -60,3 +60,7 @@ input {
     border: 2px black solid;
     cursor: pointer;
 }
+
+.output{
+  margin-left: 25px;
+}
