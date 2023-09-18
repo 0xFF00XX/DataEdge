@@ -1,68 +1,86 @@
 
+//flat picker configs
+const config = {
+  enableTime: true,
+  time_24hr : true,
+  // maxDate: "today",
+  defaultDate: currDateTime(),
+  maxDate: currDateTime(),
+  dateFormat: "d-m-Y H:i",
+  altInput: true,
+  altFormat: "F j, Y @ H:i",
+  minuteIncrement: 1
+}
+
+// flatpciker init
+const startFlatInput = document.getElementById("flatStart");
+const endFlatInput = document.getElementById("flatEnd");
+// flatpicker setup
+const endFlatPicker = flatpickr(endFlatInput,config);
+const startFlatPicker = flatpickr(startFlatInput, {
+  enableTime: true,
+  time_24hr : true,
+  defaultDate: currDateTime(),
+  maxDate: currDateTime(),
+  dateFormat: "d-m-Y H:i",
+  altInput: true,
+  altFormat: "F j, Y @ H:i",
+  minuteIncrement: 1,
+  onChange: function(selectedDates, dateStr, instance){
+      endFlatPicker.set("minDate", dateStr);
+
+  // Constrain the maxDate of the start date picker to today's date
+      startFlatPicker.set("maxDate", currDateTime());
+  },
+  });
 
 
-//
-// get values time, ip, Group date
-//
-//set fields to value that was submitted.
-// var ip = "10.0.0.93";
-// var groupName = "";
-var FULL_DAY, GROUP_NAME, HOURS_in_DAY, MINS_in_HOUR, SECS_in_MIN, bitsIn, bitsOut, endTime, ip, numberOfDays, numberOfHours, startTime, timeStamp;
-GROUP_NAME = "DEL_98_Test";
-ip = "10.0.0.93";
-HOURS_in_DAY = 24;
-MINS_in_HOUR = 60;
-SECS_in_MIN = 60;
-FULL_DAY = 86400;
-startTime = 1669852800;
-endTime = 1670479200;
-bitsIn = [];
-bitsOut = [];
-timeStamp = [];
-numberOfDays = 0;
-numberOfHours = 0;
 
-document.getElementById("submit").addEventListener("click", function(){
-    main();
+
+function currDateTime(){
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth();
+  var currentDay = now.getDate();
+  var currentHour = now.getHours();
+  var currentMinute = now.getMinutes();
+  // Create a date object with the current date and time
+  console.log();
+
+  var currentDateAndTime = new Date(currentYear, currentMonth, currentDay, currentHour, currentMinute);
+  return currentDateAndTime
+}
+
+// hide date - time selector if not Custom range
+const selector = document.getElementById('selectTimeRange');
+const flatTimes = document.getElementById('flatTimes');
+selector.addEventListener('change', function() {
+  // Check if the "Custom" option is selected
+  if (selector.value === 'Custom') {
+    flatTimes.style.display = "block"; // Show time pickers
+  } else {
+    flatTimes.style.display = "none"; // Hide time pickers
+  }
 });
-function main() {
-  // alert("dssdf");
-  console.log('submit pressed');
-  requestData(1669852800,1670479200,288);
+
+
+
+document.getElementById("submitForm").addEventListener("submit", function(event) {
+  event.preventDefault(); // Prevent the default form submission
+
+  const startEpoch = (new Date(startFlatPicker.selectedDates).getTime())/1000;
+  const endEpoch = (new Date(endFlatPicker.selectedDates).getTime())/1000;
+
+  graph(startEpoch, endEpoch, "max_im_BitsIn", "BIP")
+  console.log(startEpoch);
+
+});
+
+function graph(epochStart, epochEnd, metric, group){
+
 }
-
-
-function requestData(startTime, endTime, numberOfEntries) {
-  url = "http://" + ip + ":8581/odata/api/groups?$top=50&$skip=0&top=" + numberOfEntries.toString() + "&&resolution=RATE&starttime=" + startTime.toString() + "&endtime=" + endTime.toString() + "&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/im_BitsIn,portmfs/im_BitsOut&$filter=((Name eq '" + GROUP_NAME + "'))";
-
-  let username = 'admin';
-  let password = '!DataOverEdge!';
-  let auth = btoa(`${username}:${password}`);
-
-
-
-  // Authenticate (dummy API)
-  console.log('sending request');
-
-  let rest = fetch(url, {
-    method:'GET',
-  	headers: new Headers({
-  		'Authorization': 'Basic ' + auth
-    // }
-  }),
-
-  })
-  .then(response => {
-      if (!response.ok) throw new Error(response.status);
-      else console.log("resr = " + rest);
-      return response.json();
-    });
-
-
-
-  // console.log(e);
-
-
-
-  // document.getElementById("output").innerHTML = data;
+function requestData(epochStart, epochEnd, metric, group){
+  
 }
+// debug
+console.log(currDateTime());
