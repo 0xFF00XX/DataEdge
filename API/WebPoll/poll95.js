@@ -67,10 +67,19 @@ selector.addEventListener('change', function() {
 
 document.getElementById("submitForm").addEventListener("submit", function(event) {
   event.preventDefault(); // Prevent the default form submission
+  let startEpoch =0 ;
+  let endEpoch =0;
 
-  const startEpoch = (new Date(startFlatPicker.selectedDates).getTime())/1000;
-  const endEpoch = (new Date(endFlatPicker.selectedDates).getTime())/1000;
+  if(selector.value === "Last hour"){
+    console.log("last hour");
+  }
+  else{
+    startEpoch = (new Date(startFlatPicker.selectedDates).getTime())/1000;
+    endEpoch = (new Date(endFlatPicker.selectedDates).getTime())/1000;
+  }
 
+
+  requestData(startEpoch, endEpoch, "max_im_BitsIn", "BIP")
   graph(startEpoch, endEpoch, "max_im_BitsIn", "BIP")
   console.log(startEpoch);
 
@@ -80,7 +89,9 @@ function graph(epochStart, epochEnd, metric, group){
 
 }
 function requestData(epochStart, epochEnd, metric, group){
-  
+  const ip = "10.0.0.91";
+  url= "http://"+ip+":8581/odata/api/groups?$top=20000&skip=0&top=20000&resolution=RATE&starttime="+epochStart+"&endtime="+epochEnd+"&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/"+metric+"&$filter=((Name eq '"+group+"'))"
+  console.log(JSON.stringify(url, null, 4));
 }
 // debug
 console.log(currDateTime());
