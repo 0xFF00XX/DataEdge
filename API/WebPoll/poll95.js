@@ -151,7 +151,7 @@ function requestData(epochStart, epochEnd, metric, group){
     const listElement = document.getElementById('graph');
     array.forEach(item => {
     const listItem = document.createElement('li');
-    listItem.textContent = `${item.name} - $${item.price}`;
+    listItem.textContent = `${item.Timestamp} - ${item.max_im_BitsIn}`;
     listElement.appendChild(listItem);
     });
       console.log('Received JSON data:', data.d.results[0].portmfs.results);

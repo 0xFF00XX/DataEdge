@@ -8,3 +8,9 @@
 nav{
   min-width: 260px;
 }
+.loaderz{
+  display: none;
+  height: 300px;
+  width: 300px;
+  background-color: red
+}
