@@ -139,19 +139,27 @@ function requestData(epochStart, epochEnd, metric, group){
   });
 
   fetch(request)
-  .then(response => {
+  .then((response) => response.json())
+  .then(data => {
     // Check if the response status is OK (status code 200)
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    else{
-      console.log('Received JSON data:', response);
-      var element = document.getElementById("graph");
-      element.textContent = JSON.stringify(response);
+    // if (!response.ok) {
+    //   throw new Error('Network response was not ok');
+    // }
+    // else{
+    const array = data.d.results[0].portmfs.results;
+
+    const listElement = document.getElementById('graph');
+    array.forEach(item => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${item.name} - $${item.price}`;
+    listElement.appendChild(listItem);
+    });
+      console.log('Received JSON data:', data.d.results[0].portmfs.results);
+
       // Parse the JSON response
       // return response.json();
       // console.log(response.json());
-    }
+    // }
 
   })
   .catch(error => {
