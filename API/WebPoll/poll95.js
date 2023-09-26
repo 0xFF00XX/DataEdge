@@ -119,7 +119,7 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
       const metricKey = "max_im_BitsIn"
       data.sort((a, b) => b[metricKey] - a[metricKey]);
       console.log(data);
-
+      
       console.log(get95perc(data,metricKey));
 
       //get 95th percentile
@@ -139,7 +139,7 @@ function get95perc(sortedData,metric){
 const n = sortedData.length;
 
 // Position in the sorted array of values where the desired quantile falls.
-const h = (n - 1) * 0.98 + 1;
+const h = (n - 1) * 0.95 + 1;
 
 // Rounding to the nearest integer
 const h_floor = Math.floor(h);
@@ -151,11 +151,12 @@ const v = vArray[h_floor - 1];
 
 // Calculates the "fractional" part of the H value, which represents how far the quantile is between the elements at indices h - 1 and h.
 const e = Math.round((h - h_floor)* 1000)/1000;
-console.log(e, h, h_floor);
+// console.log(e, h, h_floor, v);
 // If e is not 0, interpolate values for each dictionary
 let result = v;
 if (e !== 0) {
-  result += e * (n[h_floor] - v);
+  result += e * (vArray[h_floor] - v);
+  // console.log(result);
 }
 
 return result;
