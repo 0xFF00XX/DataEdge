@@ -38,7 +38,7 @@ const startFlatPicker = flatpickr(startFlatInput, {
 
 
 //request time. args -- substract from current year,month etc to use in Last Hour or Last month selections.
-//example currDateTime(0,0,0,-4,0) -- should return date four hours back.
+//example currDateTime(0,0,0,4,0) -- should return date four hours back.
 function currDateTime(year,month,date,hour,mins){
   var now = new Date();
   var currentYear = now.getFullYear() - year;
@@ -48,7 +48,6 @@ function currDateTime(year,month,date,hour,mins){
   var currentMinute = now.getMinutes() - mins;
   // Create a date object with the current date and time
   console.log();
-
   var currentDateAndTime = new Date(currentYear, currentMonth, currentDay, currentHour, currentMinute);
   return currentDateAndTime
 }
@@ -102,7 +101,7 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
     }
     else if((endEpoch - startEpoch) < 0){
 
-      errorMessageContainer.textContent = "End time below zero!";
+      errorMessageContainer.textContent = "End time difference below zero!";
     }
     else{
       isValid = true;
@@ -111,64 +110,111 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
   //perform calculations and plot with valid time
   if(isValid){
     requestData(startEpoch, endEpoch, "max_im_BitsIn", "DEL_98_Test")
+    .then(data => {
+      // This code will execute when requestData is complete and data is available
+      console.log(data);
+      console.log("last line " + data[data.length-1].Timestamp);
+
+      //getting last key
+      const metricKey = "max_im_BitsIn"
+      data.sort((a, b) => b[metricKey] - a[metricKey]);
+      console.log(data);
+
+      console.log(get95perc(data,metricKey));
+
+      //get 95th percentile
+    })
+    .catch(error => {
+      // Handle errors such as network issues or authentication problems
+      console.error('Error:', error);
+    });
     // graph(startEpoch, endEpoch, "max_im_BitsIn", "BIP")
-    console.log(startEpoch);
+
+
   }
 
 
 });
+function get95perc(sortedData,metric){
+const n = sortedData.length;
 
+// Position in the sorted array of values where the desired quantile falls.
+const h = (n - 1) * 0.98 + 1;
+
+// Rounding to the nearest integer
+const h_floor = Math.floor(h);
+
+// Get the value below h for each dictionary
+const vArray = sortedData.map(item => item[metric]);
+
+const v = vArray[h_floor - 1];
+
+// Calculates the "fractional" part of the H value, which represents how far the quantile is between the elements at indices h - 1 and h.
+const e = Math.round((h - h_floor)* 1000)/1000;
+console.log(e, h, h_floor);
+// If e is not 0, interpolate values for each dictionary
+let result = v;
+if (e !== 0) {
+  result += e * (n[h_floor] - v);
+}
+
+return result;
+
+}
 function graph(epochStart, epochEnd, metric, group){
 
 }
-function requestData(epochStart, epochEnd, metric, group){
-  const ip = "127.0.0.1";
-  const port = "8000"
-  url= "http://"+ip+":"+port+"/odata/api/groups?$top=20000&skip=0&top=20000&resolution=RATE&starttime="+epochStart+"&endtime="+epochEnd+"&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/"+metric+"&$filter=((Name eq '"+group+"'))"
+//request data from the combined link
+function requestData(epochStart, epochEnd, metric, group) {
+  return new Promise((resolve, reject) => {
+    const ip = "127.0.0.1";
+    const port = "8000";
+    const url = "http://" + ip + ":" + port + "/odata/api/groups?$top=20000&skip=0&top=20000&resolution=RATE&starttime=" + epochStart + "&endtime=" + epochEnd + "&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/" + metric + "&$filter=((Name eq '" + group + "'))";
 
-  const username = 'admin';
-  const password = '!DataOverEdge!';
-  const base64Credentials = btoa(`${username}:${password}`);
-  const headers = new Headers({
-    'Authorization': `Basic ${base64Credentials}`,
-    'Content-Type': 'application/json', // Set the content type based on the expected response
-  });
+    //metric mappings. needed to generate table depending on the seleted metric
+    const metricMappings = {
+          max_im_BitsIn: "max_im_BitsIn",
+          im_BitsIn: "im_BitsIn",
+          // Add more metric mappings as needed
+        };
 
-  const request = new Request(url, {
+        // Use the metric parameter to dynamically get the property name from the mapping
+    const property = metricMappings[metric] || metric; // Use the mapping or fallback to metric itself
 
-  });
 
-  fetch(request)
-  .then((response) => response.json())
-  .then(data => {
-    // Check if the response status is OK (status code 200)
-    // if (!response.ok) {
-    //   throw new Error('Network response was not ok');
-    // }
-    // else{
-    const array = data.d.results[0].portmfs.results;
 
-    const listElement = document.getElementById('graph');
-    array.forEach(item => {
-    const listItem = document.createElement('li');
-    listItem.textContent = `${item.Timestamp} - ${item.max_im_BitsIn}`;
-    listElement.appendChild(listItem);
+    fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      //all results are
+      console.log(data);
+      const array = data.d.results[0].portmfs.results;
+      const sums = {};
+
+      array.forEach(item => {
+        const { Timestamp, [property]: metricValue } = item;
+        if (!sums[Timestamp]) {
+          sums[Timestamp] = parseFloat(metricValue);
+        } else {
+          sums[Timestamp] += parseFloat(metricValue);
+        }
+      });
+
+      const result = Object.keys(sums).map(Timestamp => ({
+        Timestamp,
+        [property]: sums[Timestamp]
+      }));
+
+      resolve(result); // Resolve the promise with the result data
+    })
+    .catch(error => {
+      reject(error); // Reject the promise with an error if fetch fails
     });
-      console.log('Received JSON data:', data.d.results[0].portmfs.results);
-
-      // Parse the JSON response
-      // return response.json();
-      // console.log(response.json());
-    // }
-
-  })
-  .catch(error => {
-    // Handle errors such as network issues or authentication problems
-    console.error('Error:', error);
   });
-
-
-  console.log(JSON.stringify(url, null, 4));
 }
 // debug
 console.log(currDateTime(0,0,0,0,0));
