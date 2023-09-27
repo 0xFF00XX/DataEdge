@@ -172,12 +172,13 @@ function setTable(data, metric){
 
   const max = data[data.length-1][metric];
   const min = data[0][metric];
-  const perc95 = get95perc(data,metric);
-  const perc98 = get98perc(data,metric);
+  const perc95 = getPerc(data,metric, 95);
+  const perc98 = getPerc(data,metric, 98);
 
   //set above to tables
   var table = document.getElementById("dataTable");
 
+  table.
   var newRow = table.insertRow();
 
     // Create cells (columns) for the row
@@ -195,10 +196,10 @@ function setTable(data, metric){
   cell5.innerHTML = perc98;
 }
 
-function get95perc(sortedData,metric){
+function getPerc(sortedData,metric, perc){
   const n = sortedData.length;
   // Position in the sorted array of values where the desired quantile falls.
-  const h = (n - 1) * 0.95 + 1;
+  const h = (n - 1) * perc + 1;
   // Rounding to the nearest integer
   const h_floor = Math.floor(h);
   // Get the value below h for each dictionary
@@ -216,27 +217,7 @@ function get95perc(sortedData,metric){
   return result;
 }
 
-//98 percentile
-function get98perc(sortedData,metric){
-  const n = sortedData.length;
-  // Position in the sorted array of values where the desired quantile falls.
-  const h = (n - 1) * 0.98 + 1;
-  // Rounding to the nearest integer
-  const h_floor = Math.floor(h);
-  // Get the value below h for each dictionary
-  const vArray = sortedData.map(item => item[metric]);
-  const v = vArray[h_floor - 1];
-  // Calculates the "fractional" part of the H value, which represents how far the quantile is between the elements at indices h - 1 and h.
-  const e = Math.round((h - h_floor)* 1000)/1000;
-  // console.log(e, h, h_floor, v);
-  // If e is not 0, interpolate values for each dictionary
-  let result = v;
-  if (e !== 0) {
-    result += e * (vArray[h_floor] - v);
-    // console.log(result);
-  }
-  return result;
-}
+
 
 
 
