@@ -142,7 +142,7 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
         data.sort((a, b) => a[metricKey] - b[metricKey]);
         // console.log(data);
         setTable(data, metricKey);
-        console.log(get95perc(data,metricKey));
+        // console.log(get95perc(data,metricKey));
 
 
         //populate grpah
@@ -169,19 +169,21 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
 });
 
 function setTable(data, metric){
-
+  //supply values to output in table
   const max = data[data.length-1][metric];
   const min = data[0][metric];
-  const perc95 = getPerc(data,metric, 95);
-  const perc98 = getPerc(data,metric, 98);
+  const perc95 = getPerc(data,metric, 0.95);
+  const perc98 = getPerc(data,metric, 0.98);
 
-  //set above to tables
-  var table = document.getElementById("dataTable");
+  //init table
+  var tbody = document.getElementById("tableBody");
+  // Remove all rows from the table body
+  $("#tableBody tr").remove();
 
-  table.
-  var newRow = table.insertRow();
 
-    // Create cells (columns) for the row
+
+  var newRow = tbody.insertRow();
+  // Create cells (columns) for the row
   var cell1 = newRow.insertCell(0);
   var cell2 = newRow.insertCell(1);
   var cell3 = newRow.insertCell(2);
@@ -196,6 +198,7 @@ function setTable(data, metric){
   cell5.innerHTML = perc98;
 }
 
+//Get percentile. Supply sorted array in ascending order, used metric, and needed percentile
 function getPerc(sortedData,metric, perc){
   const n = sortedData.length;
   // Position in the sorted array of values where the desired quantile falls.
