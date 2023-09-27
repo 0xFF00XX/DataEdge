@@ -16,6 +16,10 @@ const config = {
 // flatpciker init
 const startFlatInput = document.getElementById("flatStart");
 const endFlatInput = document.getElementById("flatEnd");
+
+//init chart
+let myChart;
+
 // flatpicker setup
 const endFlatPicker = flatpickr(endFlatInput,config);
 const startFlatPicker = flatpickr(startFlatInput, {
@@ -36,7 +40,15 @@ const startFlatPicker = flatpickr(startFlatInput, {
   });
 
 
+// Function to show the loading spinner
+function showLoadingSpinner() {
+  document.getElementById('loading-spinner').style.display = 'block';
+}
 
+// Function to hide the loading spinner
+function hideLoadingSpinner() {
+  document.getElementById('loading-spinner').style.display = 'none';
+}
 //request time. args -- substract from current year,month etc to use in Last Hour or Last month selections.
 //example currDateTime(0,0,0,4,0) -- should return date four hours back.
 function currDateTime(year,month,date,hour,mins){
@@ -68,12 +80,12 @@ selector.addEventListener('change', function() {
 
 document.getElementById("submitForm").addEventListener("submit", function(event) {
   event.preventDefault(); // Prevent the default form submission
-
+  if (myChart) myChart.destroy();
   const errorMessageContainer = document.getElementById("error-message");
   errorMessageContainer.textContent = "";
   let isValid = false;
-  let startEpoch =0 ;
-  let endEpoch =0;
+  let startEpoch = 0;
+  let endEpoch = 0;
 
   if(selector.value === "hour"){
     console.log("last hour");
@@ -100,7 +112,6 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
       errorMessageContainer.textContent = "End time is less than 5 minutes from Start Time.";
     }
     else if((endEpoch - startEpoch) < 0){
-
       errorMessageContainer.textContent = "End time difference below zero!";
     }
     else{
@@ -109,22 +120,43 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
   }
   //perform calculations and plot with valid time
   if(isValid){
+
+    ///METRICS AND GROUPS SHOULD BE DYNAMIC
+    showLoadingSpinner();
     requestData(startEpoch, endEpoch, "max_im_BitsIn", "DEL_98_Test")
     .then(data => {
+      hideLoadingSpinner();
       // This code will execute when requestData is complete and data is available
-      console.log(data);
-      console.log("last line " + data[data.length-1].Timestamp);
+      if(data.length == 0){
+        //ERROR NO DATA
+        console.error("No data");
+      }
+      else{
+        console.log(data);
+        console.log("last line " + data[data.length-1].Timestamp);
 
-      //getting last key
-      const metricKey = "max_im_BitsIn"
-      data.sort((a, b) => b[metricKey] - a[metricKey]);
-      console.log(data);
-      
-      console.log(get95perc(data,metricKey));
+        //getting last key
+        const metricKey = "max_im_BitsIn"
+        graph(data, metricKey)
+
+        data.sort((a, b) => a[metricKey] - b[metricKey]);
+        // console.log(data);
+        setTable(data, metricKey);
+        console.log(get95perc(data,metricKey));
+
+
+        //populate grpah
+        // graph(data, metricKey)
+
+
+        //populate Table
+      }
+
 
       //get 95th percentile
     })
     .catch(error => {
+      hideLoadingSpinner();
       // Handle errors such as network issues or authentication problems
       console.error('Error:', error);
     });
@@ -135,34 +167,159 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
 
 
 });
+
+function setTable(data, metric){
+
+  const max = data[data.length-1][metric];
+  const min = data[0][metric];
+  const perc95 = get95perc(data,metric);
+  const perc98 = get98perc(data,metric);
+
+  //set above to tables
+  var table = document.getElementById("dataTable");
+
+  var newRow = table.insertRow();
+
+    // Create cells (columns) for the row
+  var cell1 = newRow.insertCell(0);
+  var cell2 = newRow.insertCell(1);
+  var cell3 = newRow.insertCell(2);
+  var cell4 = newRow.insertCell(3);
+  var cell5 = newRow.insertCell(4);
+
+
+  cell1.innerHTML = metric;
+  cell2.innerHTML = min;
+  cell3.innerHTML = max;
+  cell4.innerHTML = perc95;
+  cell5.innerHTML = perc98;
+}
+
 function get95perc(sortedData,metric){
-const n = sortedData.length;
-
-// Position in the sorted array of values where the desired quantile falls.
-const h = (n - 1) * 0.95 + 1;
-
-// Rounding to the nearest integer
-const h_floor = Math.floor(h);
-
-// Get the value below h for each dictionary
-const vArray = sortedData.map(item => item[metric]);
-
-const v = vArray[h_floor - 1];
-
-// Calculates the "fractional" part of the H value, which represents how far the quantile is between the elements at indices h - 1 and h.
-const e = Math.round((h - h_floor)* 1000)/1000;
-// console.log(e, h, h_floor, v);
-// If e is not 0, interpolate values for each dictionary
-let result = v;
-if (e !== 0) {
-  result += e * (vArray[h_floor] - v);
-  // console.log(result);
+  const n = sortedData.length;
+  // Position in the sorted array of values where the desired quantile falls.
+  const h = (n - 1) * 0.95 + 1;
+  // Rounding to the nearest integer
+  const h_floor = Math.floor(h);
+  // Get the value below h for each dictionary
+  const vArray = sortedData.map(item => item[metric]);
+  const v = vArray[h_floor - 1];
+  // Calculates the "fractional" part of the H value, which represents how far the quantile is between the elements at indices h - 1 and h.
+  const e = Math.round((h - h_floor)* 1000)/1000;
+  // console.log(e, h, h_floor, v);
+  // If e is not 0, interpolate values for each dictionary
+  let result = v;
+  if (e !== 0) {
+    result += e * (vArray[h_floor] - v);
+    // console.log(result);
+  }
+  return result;
 }
 
-return result;
-
+//98 percentile
+function get98perc(sortedData,metric){
+  const n = sortedData.length;
+  // Position in the sorted array of values where the desired quantile falls.
+  const h = (n - 1) * 0.98 + 1;
+  // Rounding to the nearest integer
+  const h_floor = Math.floor(h);
+  // Get the value below h for each dictionary
+  const vArray = sortedData.map(item => item[metric]);
+  const v = vArray[h_floor - 1];
+  // Calculates the "fractional" part of the H value, which represents how far the quantile is between the elements at indices h - 1 and h.
+  const e = Math.round((h - h_floor)* 1000)/1000;
+  // console.log(e, h, h_floor, v);
+  // If e is not 0, interpolate values for each dictionary
+  let result = v;
+  if (e !== 0) {
+    result += e * (vArray[h_floor] - v);
+    // console.log(result);
+  }
+  return result;
 }
-function graph(epochStart, epochEnd, metric, group){
+
+
+
+function graph(data, metric){
+  const timestamps = data.map(item => new Date(item.Timestamp * 1000));
+  console.log(timestamps[0]);
+  const metrics = data.map(item => item[metric])
+
+  const ctx = document.getElementById('interpolationChart');
+
+
+
+
+    console.log(data);
+    myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: timestamps,
+        datasets: [
+          {
+            label: 'Max im BitsIn',
+            data: metrics,
+            borderColor: 'blue',
+            borderWidth: 2,
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        plugins: {
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'xy',
+            }
+          }
+        },
+        responsive: true,
+        tooltips:{
+           mode: 'index',
+           intersect: false
+        },
+        hover: {
+           mode: 'index',
+           intersect: false
+        },
+        scales: {
+          x: {
+              beginAtZero: true,
+              type: 'time',
+              time: {
+              parser: 'YYYY-MM-DD HH:mm',
+              tooltipFormat: 'HH:mm',
+              unit: 'hour',
+              unitStepSize: 1,
+              displayFormats: {
+                millisecond: 'HH:mm:ss.SSS',
+                second: 'HH:mm:ss',
+                minute: 'HH:mm',
+                hour: 'dd-MMM | HH:mm',
+
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            scaleLabel: {
+                display: true,
+                labelString: 'Time'
+            },
+          },
+        },
+      },
+    });
+
+
+
+
 
 }
 //request data from the combined link
@@ -171,7 +328,7 @@ function requestData(epochStart, epochEnd, metric, group) {
     const ip = "127.0.0.1";
     const port = "8000";
     const url = "http://" + ip + ":" + port + "/odata/api/groups?$top=20000&skip=0&top=20000&resolution=RATE&starttime=" + epochStart + "&endtime=" + epochEnd + "&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/" + metric + "&$filter=((Name eq '" + group + "'))";
-
+// console.error(url);
     //metric mappings. needed to generate table depending on the seleted metric
     const metricMappings = {
           max_im_BitsIn: "max_im_BitsIn",

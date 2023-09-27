@@ -8,9 +8,16 @@
 nav{
   min-width: 260px;
 }
-.loaderz{
-  display: none;
-  height: 300px;
-  width: 300px;
-  background-color: red
+
+#interpolationChart{
+  width:100%;
+  max-width:1200px;
+
+}
+#loading-spinner{
+  /* background-color: red; */
+  /* height: 100%; */
+}
+#graph{
+  /* background-color: red; */
 }

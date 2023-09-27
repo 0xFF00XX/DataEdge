@@ -5,7 +5,7 @@ import base64
 import config
 # Define the proxy server configuration
 PORT = 8000  # Choose a port for your proxy server
-TARGET_HOST = "10.0.0.93"  # Replace with the base URL of the external API
+TARGET_HOST = config.ip  # Replace with the base URL of the external API
 TARGET_PORT = 8581  # Default HTTP port
 
 class ProxyHandler(http.server.CGIHTTPRequestHandler):
