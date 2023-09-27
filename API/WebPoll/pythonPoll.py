@@ -3,6 +3,7 @@ import os
 import json
 from datetime import datetime, timezone
 from tabulate import tabulate
+import config
 
 # TODO:
 #set days. Get data for end of day, biginning of day and in between
@@ -38,7 +39,7 @@ def requestData(startTime,endTime, numberOfEntries):
         print()
         # url = "http://"+ip+":8581/odata/api/groups?$top=50&$skip=0&top=" + str(numberOfEntries)+"&&resolution=RATE&starttime="+str(startTime)+"&endtime="+str(endTime)+"&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/im_BitsIn,portmfs/im_BitsOut&$filter=((Name eq '"+GROUP_NAME+"'))"
         # url = "http://"+ip+":8581/odata/api/groups?$top=50&$skip=0&top=" + str(numberOfEntries)+"&&resolution=RATE&starttime="+str(startTime)+"&endtime="+str(endTime)+"&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/im_BitsIn,portmfs/im_BitsOut&$filter=((Name eq '"+GROUP_NAME+"'))"
-        r = requests.get(url, auth=('admin', '@Pass2022A'))
+        r = requests.get(url, auth=(config.username, config.password))
         # print(r.text)
         print()
         data = json.loads(r.text)["d"]["results"][0]["portmfs"]["results"]

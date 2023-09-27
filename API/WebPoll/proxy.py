@@ -2,6 +2,7 @@ import http.server
 import socketserver
 import urllib.request
 import base64
+import config
 # Define the proxy server configuration
 PORT = 8000  # Choose a port for your proxy server
 TARGET_HOST = "10.0.0.93"  # Replace with the base URL of the external API
@@ -28,8 +29,8 @@ class ProxyHandler(http.server.CGIHTTPRequestHandler):
         super().end_headers()
 
         try:
-            username = "admin"
-            password = "!DataOverEdge!"
+            username = config.username
+            password = config.password
             auth_header = {"Authorization": f"Basic {base64.b64encode(f'{username}:{password}'.encode()).decode()}"}
             request = urllib.request.Request(target_url, headers=auth_header)
             # Fetch content from the target server
