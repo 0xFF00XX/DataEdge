@@ -1,5 +1,8 @@
 #ignore credentials file
 config.py
+
+# Ignore Python __pycache__ folders and files
 __pycache__/
+
+# Ignore any .pyc files
 *.pyc
-.gitignore
