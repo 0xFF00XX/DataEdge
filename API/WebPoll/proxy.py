@@ -34,6 +34,7 @@ class ProxyHandler(http.server.CGIHTTPRequestHandler):
             auth_header = {"Authorization": f"Basic {base64.b64encode(f'{username}:{password}'.encode()).decode()}"}
             request = urllib.request.Request(target_url, headers=auth_header)
             # Fetch content from the target server
+            print("[+] request sent")
             with urllib.request.urlopen(request) as response:
                 content = response.read()
                 print(type(content))

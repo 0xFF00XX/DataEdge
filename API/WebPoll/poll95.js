@@ -1,5 +1,5 @@
 
-//flat picker configs
+//flat picker (date - time) gloabl configs
 const config = {
   enableTime: true,
   time_24hr : true,
@@ -13,7 +13,7 @@ const config = {
   minuteIncrement: 1
 }
 
-// flatpciker init
+// flatpciker init HAS TO BE IN FUNCTION AND INITED EVERY MIN or action
 const startFlatInput = document.getElementById("flatStart");
 const endFlatInput = document.getElementById("flatEnd");
 
@@ -65,8 +65,11 @@ function currDateTime(year,month,date,hour,mins){
 }
 
 // hide date - time selector if not Custom range
+//init seletor and time pickers
 const selector = document.getElementById('selectTimeRange');
 const flatTimes = document.getElementById('flatTimes');
+
+
 selector.addEventListener('change', function() {
   // Check if the "Custom" option is selected
   if (selector.value === 'custom') {
@@ -77,7 +80,27 @@ selector.addEventListener('change', function() {
 });
 
 
+//convert BITS to UNITS
+function convertBitsToHigherUnits(bits) {
+    if (bits >= 1e9) {
+        // Convert to Gbits
+        return (bits / 1e9).toFixed(2) + ' Gbits';
+    } else if (bits >= 1e6) {
+        // Convert to Mbits
+        return (bits / 1e6).toFixed(2) + ' Mbits';
+    } else if (bits >= 1e3) {
+        // Convert to Kbits
+        return (bits / 1e3).toFixed(2) + ' Kbits';
+    } else {
+        // Leave as bits
+        return bits.toFixed(2) + ' bits';
+    }
+}
 
+
+//
+//Start of SUBMIT button action
+//
 document.getElementById("submitForm").addEventListener("submit", function(event) {
   event.preventDefault(); // Prevent the default form submission
   if (myChart) myChart.destroy();
@@ -85,38 +108,55 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
   errorMessageContainer.textContent = "";
   let isValid = false;
   let startEpoch = 0;
-  let endEpoch = 0;
+  let endEpoch = (new Date(currDateTime(0,0,0,0,0)).getTime())/1000;
 
   if(selector.value === "hour"){
     console.log("last hour");
+    //start epoch - hour from now
+    //end eposh - now
+
+    startEpoch = (new Date(currDateTime(0,0,0,1,0)).getTime())/1000;
+    isValid = true;
   }
   else if (selector.value === "4hours"){
-    console.log("last 4 hours");
+    startEpoch = (new Date(currDateTime(0,0,0,4,0)).getTime())/1000;
+    isValid = true;
   }
   else if (selector.value === "day"){
     console.log("last 24 hours");
+    startEpoch = (new Date(currDateTime(0,0,1,0,0)).getTime())/1000;
+    isValid = true;
   }
   else if (selector.value === "7days"){
     console.log("last 7 days");
+    console.log(currDateTime(0,0,7,0,0));
+    console.log(currDateTime(0,0,0,0,0));
+    startEpoch = (new Date(currDateTime(0,0,7,0,0)).getTime())/1000;
+    isValid = true;
   }
   else if (selector.value === "month"){
     console.log("last month");
+    startEpoch = (new Date(currDateTime(0,1,0,0,0)).getTime())/1000;
+    isValid = true;
   }
-  else{
+  else if (selector.value === "custom"){
+    console.log("Custom time");
     startEpoch = (new Date(startFlatPicker.selectedDates).getTime())/1000;
     endEpoch = (new Date(endFlatPicker.selectedDates).getTime())/1000;
 
-    //testing for minimum
-    if(((endEpoch - startEpoch) < 300) && ((endEpoch - startEpoch) >= 0)){
+    //testing for minimum time range. Cant be less than 5 mins
+    if((endEpoch - startEpoch) < 300){
       console.log("Less than minimum");
       errorMessageContainer.textContent = "End time is less than 5 minutes from Start Time.";
-    }
-    else if((endEpoch - startEpoch) < 0){
-      errorMessageContainer.textContent = "End time difference below zero!";
     }
     else{
       isValid = true;
     }
+
+  }
+  else{
+    //option not in the list
+    console.error("Not in the list");
   }
   //perform calculations and plot with valid time
   if(isValid){
@@ -126,17 +166,20 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
     requestData(startEpoch, endEpoch, "max_im_BitsIn", "DEL_98_Test")
     .then(data => {
       hideLoadingSpinner();
+      console.log(data);
+      const metricKey = "max_im_BitsIn"
       // This code will execute when requestData is complete and data is available
-      if(data.length == 0){
+      if(data.length == 0 || data === " "){
         //ERROR NO DATA
         console.error("No data");
+        graph(data, metricKey)
       }
       else{
-        console.log(data);
+
         console.log("last line " + data[data.length-1].Timestamp);
 
         //getting last key
-        const metricKey = "max_im_BitsIn"
+
         graph(data, metricKey)
 
         data.sort((a, b) => a[metricKey] - b[metricKey]);
@@ -168,20 +211,30 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
 
 });
 
+//
+//END of submit action
+//
+
 function setTable(data, metric){
-  //supply values to output in table
-  const max = data[data.length-1][metric];
-  const min = data[0][metric];
-  const perc95 = getPerc(data,metric, 0.95);
-  const perc98 = getPerc(data,metric, 0.98);
+  //supply values to output in table rounded up
+  const max = convertBitsToHigherUnits(data[data.length-1][metric]);
+  const min = convertBitsToHigherUnits(data[0][metric]);
+  const perc95 = convertBitsToHigherUnits(getPerc(data,metric, 0.95));
+  const perc98 = convertBitsToHigherUnits(getPerc(data,metric, 0.98));
+  //
+  // RAW DATA
+  //
+  // const max = data[data.length-1][metric];
+  // const min = data[0][metric];
+  // const perc95 = getPerc(data,metric, 0.95);
+  // const perc98 = getPerc(data,metric, 0.98);
 
   //init table
   var tbody = document.getElementById("tableBody");
   // Remove all rows from the table body
   $("#tableBody tr").remove();
 
-
-
+  //populate table
   var newRow = tbody.insertRow();
   // Create cells (columns) for the row
   var cell1 = newRow.insertCell(0);
@@ -190,7 +243,7 @@ function setTable(data, metric){
   var cell4 = newRow.insertCell(3);
   var cell5 = newRow.insertCell(4);
 
-
+  //populate cells
   cell1.innerHTML = metric;
   cell2.innerHTML = min;
   cell3.innerHTML = max;
@@ -198,7 +251,7 @@ function setTable(data, metric){
   cell5.innerHTML = perc98;
 }
 
-//Get percentile. Supply sorted array in ascending order, used metric, and needed percentile
+//Get percentile. Supply sorted array in ascending order, used metric and needed percentile in decimal (eg. 0.95)
 function getPerc(sortedData,metric, perc){
   const n = sortedData.length;
   // Position in the sorted array of values where the desired quantile falls.
@@ -241,6 +294,7 @@ function graph(data, metric){
         labels: timestamps,
         datasets: [
           {
+            pointRadius: 0,
             label: 'Max im BitsIn',
             data: metrics,
             borderColor: 'blue',
@@ -250,8 +304,14 @@ function graph(data, metric){
         ],
       },
       options: {
+        animation: false,
         plugins: {
           zoom: {
+            pan: {
+              enabled: true,
+              mode: 'xy',
+              scaleMode: 'xy', // 'x' for horizontal, 'y' for vertical, 'xy' for both
+            },
             zoom: {
               wheel: {
                 enabled: true,
@@ -260,8 +320,8 @@ function graph(data, metric){
                 enabled: true
               },
               mode: 'xy',
-            }
-          }
+            },
+          },
         },
         responsive: true,
         tooltips:{
@@ -278,13 +338,10 @@ function graph(data, metric){
               type: 'time',
               time: {
               parser: 'YYYY-MM-DD HH:mm',
-              tooltipFormat: 'HH:mm',
+              tooltipFormat: 'dd-MMM | HH:mm',
               unit: 'hour',
               unitStepSize: 1,
               displayFormats: {
-                millisecond: 'HH:mm:ss.SSS',
-                second: 'HH:mm:ss',
-                minute: 'HH:mm',
                 hour: 'dd-MMM | HH:mm',
 
               }
@@ -302,9 +359,6 @@ function graph(data, metric){
     });
 
 
-
-
-
 }
 //request data from the combined link
 function requestData(epochStart, epochEnd, metric, group) {
@@ -320,7 +374,7 @@ function requestData(epochStart, epochEnd, metric, group) {
           // Add more metric mappings as needed
         };
 
-        // Use the metric parameter to dynamically get the property name from the mapping
+    // Use the metric parameter to dynamically get the property name from the mapping
     const property = metricMappings[metric] || metric; // Use the mapping or fallback to metric itself
 
 
@@ -350,7 +404,7 @@ function requestData(epochStart, epochEnd, metric, group) {
         Timestamp,
         [property]: sums[Timestamp]
       }));
-
+      console.log(result);
       resolve(result); // Resolve the promise with the result data
     })
     .catch(error => {

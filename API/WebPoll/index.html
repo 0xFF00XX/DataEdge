@@ -7,11 +7,12 @@
     <title>Date and Time Picker</title>
     <link rel ="stylesheet" type="text/css" src="main.css">
     <!-- Include Bootstrap CSS and JS -->
-    <script src ="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- <script src ="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
     <script src ="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>
     <script src ="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script src ="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <!-- flat picker  -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -19,8 +20,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <!-- chart  js -->
-    <script  src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script  src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/hammerjs"></script> -->
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script> -->
 
@@ -54,18 +58,18 @@
                     <form id="submitForm">
                         <!-- Selector 1 -->
                         <div class="form-group">
-                            <label for="selector1">Selector 1</label>
+                            <label for="selector1">Group</label>
                             <select class="form-control" id="selector1">
-                                <option>Option 1</option>
-                                <option>Option 2</option>
+                                <option value="BIP">BIP</option>
+                                <option>Other..</option>
                                 <!-- Add more options as needed -->
                             </select>
                         </div>
                         <!-- Selector 2 -->
                         <div class="form-group">
-                            <label for="selector2">Selector 2</label>
+                            <label for="selector2">Metric</label>
                             <select class="form-control" id="selector2">
-                                <option>Option A</option>
+                                <option value="max_im_BitsIn">Bits In</option>
                                 <option>Option B</option>
                                 <!-- Add more options as needed -->
                             </select>
