@@ -17,6 +17,9 @@ const config = {
 const startFlatInput = document.getElementById("flatStart");
 const endFlatInput = document.getElementById("flatEnd");
 
+
+//error messages
+const groupErrorMessageContainer = document.getElementById("error-message-group");
 //init chart
 let myChart;
 
@@ -40,17 +43,22 @@ const startFlatPicker = flatpickr(startFlatInput, {
   });
 
 
-// Function to show the loading spinner
+// START Function to show the loading spinner
 function showLoadingSpinner() {
   document.getElementById('loading-spinner').style.display = 'block';
 }
+// END Function to show the loading spinner
 
-// Function to hide the loading spinner
+// START Function to hide the loading spinner
 function hideLoadingSpinner() {
   document.getElementById('loading-spinner').style.display = 'none';
 }
+// END Function to hide the loading spinner
+
+
 //request time. args -- substract from current year,month etc to use in Last Hour or Last month selections.
 //example currDateTime(0,0,0,4,0) -- should return date four hours back.
+//START currDateTime
 function currDateTime(year,month,date,hour,mins){
   var now = new Date();
   var currentYear = now.getFullYear() - year;
@@ -63,24 +71,27 @@ function currDateTime(year,month,date,hour,mins){
   var currentDateAndTime = new Date(currentYear, currentMonth, currentDay, currentHour, currentMinute);
   return currentDateAndTime
 }
+//END currDateTime
 
-// hide date - time selector if not Custom range
-//init seletor and time pickers
-const selector = document.getElementById('selectTimeRange');
+
+//init seletors and time pickers
+const timeSelector = document.getElementById('selectTimeRange');
+const groupSelector = document.getElementById('groupSelector');
+const metricSelector = document.getElementById('metricSelector');
 const flatTimes = document.getElementById('flatTimes');
 
-
-selector.addEventListener('change', function() {
+//START Event listener to display or hide Time Pickers
+timeSelector.addEventListener('change', function() {
   // Check if the "Custom" option is selected
-  if (selector.value === 'custom') {
+  if (timeSelector.value === 'custom') {
     flatTimes.style.display = "block"; // Show time pickers
   } else {
     flatTimes.style.display = "none"; // Hide time pickers
   }
 });
+//END Event listener
 
-
-//convert BITS to UNITS
+//START convert BITS to UNITS
 function convertBitsToHigherUnits(bits) {
     if (bits >= 1e9) {
         // Convert to Gbits
@@ -96,6 +107,9 @@ function convertBitsToHigherUnits(bits) {
         return bits.toFixed(2) + ' bits';
     }
 }
+//END convert BITS to UNITS
+
+
 
 
 //
@@ -103,43 +117,46 @@ function convertBitsToHigherUnits(bits) {
 //
 document.getElementById("submitForm").addEventListener("submit", function(event) {
   event.preventDefault(); // Prevent the default form submission
+  //clean chart if exists
   if (myChart) myChart.destroy();
-  const errorMessageContainer = document.getElementById("error-message");
-  errorMessageContainer.textContent = "";
+  groupErrorMessageContainer.textContent = "";
+  //get values of groups and Metrics selectors.
+  let groupValue = groupSelector.value;
+  let metricValue = { value: metricSelector.value, text: metricSelector.options[metricSelector.selectedIndex].text}
+  //setup errror msg
+  const timeErrorMessageContainer = document.getElementById("error-message");
+  timeErrorMessageContainer.textContent = "";
+  //flag to contunie
   let isValid = false;
   let startEpoch = 0;
   let endEpoch = (new Date(currDateTime(0,0,0,0,0)).getTime())/1000;
 
-  if(selector.value === "hour"){
+  if(timeSelector.value === "hour"){
     console.log("last hour");
-    //start epoch - hour from now
-    //end eposh - now
-
     startEpoch = (new Date(currDateTime(0,0,0,1,0)).getTime())/1000;
     isValid = true;
   }
-  else if (selector.value === "4hours"){
+  else if (timeSelector.value === "4hours"){
+    console.log("last 4 hours");
     startEpoch = (new Date(currDateTime(0,0,0,4,0)).getTime())/1000;
     isValid = true;
   }
-  else if (selector.value === "day"){
+  else if (timeSelector.value === "day"){
     console.log("last 24 hours");
     startEpoch = (new Date(currDateTime(0,0,1,0,0)).getTime())/1000;
     isValid = true;
   }
-  else if (selector.value === "7days"){
+  else if (timeSelector.value === "7days"){
     console.log("last 7 days");
-    console.log(currDateTime(0,0,7,0,0));
-    console.log(currDateTime(0,0,0,0,0));
     startEpoch = (new Date(currDateTime(0,0,7,0,0)).getTime())/1000;
     isValid = true;
   }
-  else if (selector.value === "month"){
+  else if (timeSelector.value === "month"){
     console.log("last month");
     startEpoch = (new Date(currDateTime(0,1,0,0,0)).getTime())/1000;
     isValid = true;
   }
-  else if (selector.value === "custom"){
+  else if (timeSelector.value === "custom"){
     console.log("Custom time");
     startEpoch = (new Date(startFlatPicker.selectedDates).getTime())/1000;
     endEpoch = (new Date(endFlatPicker.selectedDates).getTime())/1000;
@@ -147,7 +164,7 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
     //testing for minimum time range. Cant be less than 5 mins
     if((endEpoch - startEpoch) < 300){
       console.log("Less than minimum");
-      errorMessageContainer.textContent = "End time is less than 5 minutes from Start Time.";
+      timeErrorMessageContainer.textContent = "End time is less than 5 minutes from Start Time.";
     }
     else{
       isValid = true;
@@ -161,9 +178,10 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
   //perform calculations and plot with valid time
   if(isValid){
 
+
     ///METRICS AND GROUPS SHOULD BE DYNAMIC
     showLoadingSpinner();
-    requestData(startEpoch, endEpoch, "max_im_BitsIn", "DEL_98_Test")
+    requestData(startEpoch, endEpoch, metricValue, groupValue)
     .then(data => {
       hideLoadingSpinner();
       console.log(data);
@@ -172,27 +190,17 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
       if(data.length == 0 || data === " "){
         //ERROR NO DATA
         console.error("No data");
-        graph(data, metricKey)
+        graph(data, metricValue);
+        // setTable("no data")
       }
       else{
 
-        console.log("last line " + data[data.length-1].Timestamp);
+        graph(data, metricValue)
 
-        //getting last key
-
-        graph(data, metricKey)
-
-        data.sort((a, b) => a[metricKey] - b[metricKey]);
+        //Sort data to process it in the table for max-min and percentiles
+        data.sort((a, b) => a[metricValue.value] - b[metricValue.value]);
         // console.log(data);
-        setTable(data, metricKey);
-        // console.log(get95perc(data,metricKey));
-
-
-        //populate grpah
-        // graph(data, metricKey)
-
-
-        //populate Table
+        setTable(data, metricValue);
       }
 
 
@@ -217,10 +225,10 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
 
 function setTable(data, metric){
   //supply values to output in table rounded up
-  const max = convertBitsToHigherUnits(data[data.length-1][metric]);
-  const min = convertBitsToHigherUnits(data[0][metric]);
-  const perc95 = convertBitsToHigherUnits(getPerc(data,metric, 0.95));
-  const perc98 = convertBitsToHigherUnits(getPerc(data,metric, 0.98));
+  const max = convertBitsToHigherUnits(data[data.length-1][metric.value]);
+  const min = convertBitsToHigherUnits(data[0][metric.value]);
+  const perc95 = convertBitsToHigherUnits(getPerc(data,metric.value, 0.95));
+  const perc98 = convertBitsToHigherUnits(getPerc(data,metric.value, 0.98));
   //
   // RAW DATA
   //
@@ -244,7 +252,7 @@ function setTable(data, metric){
   var cell5 = newRow.insertCell(4);
 
   //populate cells
-  cell1.innerHTML = metric;
+  cell1.innerHTML = metric.text;
   cell2.innerHTML = min;
   cell3.innerHTML = max;
   cell4.innerHTML = perc95;
@@ -280,14 +288,14 @@ function getPerc(sortedData,metric, perc){
 function graph(data, metric){
   const timestamps = data.map(item => new Date(item.Timestamp * 1000));
   console.log(timestamps[0]);
-  const metrics = data.map(item => item[metric])
+  const metrics = data.map(item => item[metric.value])
 
   const ctx = document.getElementById('interpolationChart');
 
 
 
 
-    console.log(data);
+    console.log(metric.text);
     myChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -295,7 +303,7 @@ function graph(data, metric){
         datasets: [
           {
             pointRadius: 0,
-            label: 'Max im BitsIn',
+            label: metric.text,
             data: metrics,
             borderColor: 'blue',
             borderWidth: 2,
@@ -360,23 +368,15 @@ function graph(data, metric){
 
 
 }
+
+
 //request data from the combined link
 function requestData(epochStart, epochEnd, metric, group) {
   return new Promise((resolve, reject) => {
-    const ip = "127.0.0.1";
+    const ip = "192.168.3.251";
     const port = "8000";
-    const url = "http://" + ip + ":" + port + "/odata/api/groups?$top=20000&skip=0&top=20000&resolution=RATE&starttime=" + epochStart + "&endtime=" + epochEnd + "&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/" + metric + "&$filter=((Name eq '" + group + "'))";
-// console.error(url);
-    //metric mappings. needed to generate table depending on the seleted metric
-    const metricMappings = {
-          max_im_BitsIn: "max_im_BitsIn",
-          im_BitsIn: "im_BitsIn",
-          // Add more metric mappings as needed
-        };
-
-    // Use the metric parameter to dynamically get the property name from the mapping
-    const property = metricMappings[metric] || metric; // Use the mapping or fallback to metric itself
-
+    console.log("in request: " +metric.value);
+    const url = "http://" + ip + ":" + port + "/odata/api/groups?$top=20000&skip=0&top=20000&resolution=RATE&starttime=" + epochStart + "&endtime=" + epochEnd + "&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/" + metric.value + "&$filter=((Name eq '" + group + "'))";
 
 
     fetch(url, {
@@ -387,25 +387,39 @@ function requestData(epochStart, epochEnd, metric, group) {
     .then(response => response.json())
     .then(data => {
       //all results are
-      console.log(data);
-      const array = data.d.results[0].portmfs.results;
-      const sums = {};
+      // console.log(data);
+      let array;
+      try {
+        array = data.d.results[0].portmfs.results;
+        const sums = {};
 
-      array.forEach(item => {
-        const { Timestamp, [property]: metricValue } = item;
-        if (!sums[Timestamp]) {
-          sums[Timestamp] = parseFloat(metricValue);
-        } else {
-          sums[Timestamp] += parseFloat(metricValue);
-        }
-      });
+        array.forEach(item => {
 
-      const result = Object.keys(sums).map(Timestamp => ({
-        Timestamp,
-        [property]: sums[Timestamp]
-      }));
-      console.log(result);
-      resolve(result); // Resolve the promise with the result data
+          const Timestamp = item.Timestamp;
+          const metricValue = item[metric.value];
+
+          if (!sums[Timestamp]) {
+            sums[Timestamp] = parseFloat(metricValue);
+          } else {
+            sums[Timestamp] += parseFloat(metricValue);
+          }
+        });
+
+        const result = Object.keys(sums).map(Timestamp => ({
+          Timestamp,
+          [metric.value]: sums[Timestamp]
+        }));
+        // console.log(result);
+        resolve(result);
+      } catch (e) {
+
+        groupErrorMessageContainer.textContent = "Received empty data set. Group doesnt exist?";
+        $("#tableBody tr").remove();
+        reject(e);
+
+      }
+
+     // Resolve the promise with the result data
     })
     .catch(error => {
       reject(error); // Reject the promise with an error if fetch fails

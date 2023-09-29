@@ -2,6 +2,9 @@
   min-width: 500px;
   width: 500px;
 } */
+body{
+  min-height: 800px;
+}
 #flatTimes{
   margin-bottom: 15px;
 }

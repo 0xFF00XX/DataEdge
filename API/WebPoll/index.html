@@ -42,40 +42,41 @@
 
 </style>
 </head>
-<body >
-<div class="loaderz">
+<body class="">
 
-</div>
 <div class="vh-100 d-flex align-items-center">
-
-
-    <div class="container-fluid">
+    <div class="container-fluid ">
         <div class="row">
             <!-- Sidebar -->
-            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <nav class="col-lg-3 col-md-4 col-sm-12 bg-light sidebar">
                 <div class="position-sticky">
-                    <h5 class="mt-3">Sidebar</h5>
+                    <h5 class="mt-3">Menu</h5>
                     <form id="submitForm">
                         <!-- Selector 1 -->
                         <div class="form-group">
-                            <label for="selector1">Group</label>
-                            <select class="form-control" id="selector1">
+                            <label for="groupSelector">Group</label>
+                            <select class="form-control" id="groupSelector">
                                 <option value="BIP">BIP</option>
+                                <option value="DEL_98_Test">DEL_98_Test</option>
+                                <option>Other..</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                            <div id="error-message-group" class="text-danger">
+
+                            </div>
+                        </div>
+                        <!-- Selector 2 -->
+                        <div class="form-group">
+                            <label for="metricSelector">Metric</label>
+                            <select class="form-control" id="metricSelector">
+                                <option value="max_im_BitsIn">Bits In</option>
+                                <option value="max_im_BitsOut">Bits Out</option>
                                 <option>Other..</option>
                                 <!-- Add more options as needed -->
                             </select>
                         </div>
-                        <!-- Selector 2 -->
                         <div class="form-group">
-                            <label for="selector2">Metric</label>
-                            <select class="form-control" id="selector2">
-                                <option value="max_im_BitsIn">Bits In</option>
-                                <option>Option B</option>
-                                <!-- Add more options as needed -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                          <label for="selector1">Time range</label>
+                          <label for="selectTimeRange">Time range</label>
                           <select class="form-control" id="selectTimeRange">
                               <option value = "hour">Last hour</option>
                               <option value = "4hours">Last 4 hours</option>
@@ -92,7 +93,7 @@
 
 
                           <div >
-                            <h4>flat picker</h4>
+                            <!-- <h4>flat picker</h4> -->
                             <div >
                                 <label for="timePicker">Start Time Picker</label>
                                 <input  type="text" class="form-control" id="flatStart" data-input>
@@ -121,7 +122,7 @@
             </nav>
 
             <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="col-lg-9 col-md-8 col-sm-12">
                 <!-- Graph Container -->
                 <div id="graph" class="container">
                     <h2>Graph</h2>
