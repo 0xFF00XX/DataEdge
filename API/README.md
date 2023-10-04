@@ -1,5 +1,5 @@
 
-# 95th Percentile Project
+# How To Use 95th Percentile Project
 
 This website is an imitation of CA CABI.
 It gets data from the Data Aggregator, processes it, plots a graph and fills up a table.
