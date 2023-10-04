@@ -6,7 +6,7 @@ It gets data from the Data Aggregator, processes it, plots a graph and fills up 
 
 Table returns 95th and 98th percentiles which are identical to CABIs result.
 
-Project uses multiple CDN links, access to internet required, unless all required packages are downloaded locally.
+Project uses multiple CDN links, access to internet required, unless all necessary packages are downloaded locally.
 
 
 ## Pre-requisites
