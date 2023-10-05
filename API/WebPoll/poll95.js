@@ -17,6 +17,9 @@ const config = {
 const startFlatInput = document.getElementById("flatStart");
 const endFlatInput = document.getElementById("flatEnd");
 
+//IP OF LOCAL MACHINE
+const ip = "10.0.0.236";
+const port = "8000";
 
 //error messages
 const groupErrorMessageContainer = document.getElementById("error-message-group");
@@ -79,6 +82,12 @@ const timeSelector = document.getElementById('selectTimeRange');
 const groupSelector = document.getElementById('groupSelector');
 const metricSelector = document.getElementById('metricSelector');
 const flatTimes = document.getElementById('flatTimes');
+
+
+
+
+
+
 
 //START Event listener to display or hide Time Pickers
 timeSelector.addEventListener('change', function() {
@@ -185,13 +194,13 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
     .then(data => {
       hideLoadingSpinner();
       console.log(data);
-      const metricKey = "max_im_BitsIn"
+
       // This code will execute when requestData is complete and data is available
       if(data.length == 0 || data === " "){
         //ERROR NO DATA
         console.error("No data");
         graph(data, metricValue);
-        // setTable("no data")
+        setTable("null",0)
       }
       else{
 
@@ -223,20 +232,11 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
 //END of submit action
 //
 
-function setTable(data, metric){
-  //supply values to output in table rounded up
-  const max = convertBitsToHigherUnits(data[data.length-1][metric.value]);
-  const min = convertBitsToHigherUnits(data[0][metric.value]);
-  const perc95 = convertBitsToHigherUnits(getPerc(data,metric.value, 0.95));
-  const perc98 = convertBitsToHigherUnits(getPerc(data,metric.value, 0.98));
-  //
-  // RAW DATA
-  //
-  // const max = data[data.length-1][metric];
-  // const min = data[0][metric];
-  // const perc95 = getPerc(data,metric, 0.95);
-  // const perc98 = getPerc(data,metric, 0.98);
 
+//
+//Start of set table
+//
+function setTable(data, metric){
   //init table
   var tbody = document.getElementById("tableBody");
   // Remove all rows from the table body
@@ -251,15 +251,46 @@ function setTable(data, metric){
   var cell4 = newRow.insertCell(3);
   var cell5 = newRow.insertCell(4);
 
-  //populate cells
-  cell1.innerHTML = metric.text;
-  cell2.innerHTML = min;
-  cell3.innerHTML = max;
-  cell4.innerHTML = perc95;
-  cell5.innerHTML = perc98;
-}
+  if(data === "null"){
 
-//Get percentile. Supply sorted array in ascending order, used metric and needed percentile in decimal (eg. 0.95)
+
+    //populate cells
+    cell1.innerHTML = "0";
+    cell2.innerHTML = "0";
+    cell3.innerHTML = "0";
+    cell4.innerHTML = "0";
+    cell5.innerHTML = "0";
+  }
+  else{
+    //supply values to output in table rounded up
+    const max = convertBitsToHigherUnits(data[data.length-1][metric.value]);
+    const min = convertBitsToHigherUnits(data[0][metric.value]);
+    const perc95 = convertBitsToHigherUnits(getPerc(data,metric.value, 0.95));
+    const perc98 = convertBitsToHigherUnits(getPerc(data,metric.value, 0.98));
+    //
+    // RAW DATA
+    //
+    // const max = data[data.length-1][metric];
+    // const min = data[0][metric];
+    // const perc95 = getPerc(data,metric, 0.95);
+    // const perc98 = getPerc(data,metric, 0.98);
+
+
+
+    //populate cells
+    cell1.innerHTML = metric.text;
+    cell2.innerHTML = min;
+    cell3.innerHTML = max;
+    cell4.innerHTML = perc95;
+    cell5.innerHTML = perc98;
+  }
+
+}
+//END of settable
+
+
+//Get percentile. Supply sorted array in ascending order,
+// used metric and needed percentile in decimal (eg. 0.95)
 function getPerc(sortedData,metric, perc){
   const n = sortedData.length;
   // Position in the sorted array of values where the desired quantile falls.
@@ -280,8 +311,6 @@ function getPerc(sortedData,metric, perc){
   }
   return result;
 }
-
-
 
 
 
@@ -373,8 +402,8 @@ function graph(data, metric){
 //request data from the combined link
 function requestData(epochStart, epochEnd, metric, group) {
   return new Promise((resolve, reject) => {
-    const ip = "192.168.3.251";
-    const port = "8000";
+    //ip
+
     console.log("in request: " +metric.value);
     const url = "http://" + ip + ":" + port + "/odata/api/groups?$top=20000&skip=0&top=20000&resolution=RATE&starttime=" + epochStart + "&endtime=" + epochEnd + "&$format=json&$expand=portmfs&$select=ID,Name,portmfs/Timestamp,portmfs/" + metric.value + "&$filter=((Name eq '" + group + "'))";
 

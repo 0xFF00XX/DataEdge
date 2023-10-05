@@ -3,6 +3,12 @@ import socketserver
 import urllib.request
 import base64
 import config
+
+# config includes
+# DA IP address
+# Username
+# Password
+
 # Define the proxy server configuration
 PORT = 8000  # Choose a port for your proxy server
 TARGET_HOST = config.ip  # Replace with the base URL of the external API
@@ -37,7 +43,7 @@ class ProxyHandler(http.server.CGIHTTPRequestHandler):
             print("[+] request sent")
             with urllib.request.urlopen(request) as response:
                 content = response.read()
-                print(type(content))
+                # print(type(content))
                 print(content)
                 # content = content.decode('utf-8')
 

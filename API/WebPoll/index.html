@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
+    <link rel="icon" href="/favicon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Date and Time Picker</title>
@@ -43,8 +43,11 @@
 </style>
 </head>
 <body class="">
-
-<div class="vh-100 d-flex align-items-center">
+<div class="" id="other-groups">
+  testing other groups
+</div>
+<div id="overlay" class=""></div>
+<div class="h-100 d-flex align-items-center">
     <div class="container-fluid ">
         <div class="row">
             <!-- Sidebar -->
@@ -57,8 +60,10 @@
                             <label for="groupSelector">Group</label>
                             <select class="form-control" id="groupSelector">
                                 <option value="BIP">BIP</option>
-                                <option value="DEL_98_Test">DEL_98_Test</option>
-                                <option>Other..</option>
+                                <option selected value="DEL_98_Test">DEL_98_Test</option>
+                                
+                                <!-- <option value="Group 1" >group1</option> -->
+
                                 <!-- Add more options as needed -->
                             </select>
                             <div id="error-message-group" class="text-danger">
@@ -73,7 +78,8 @@
                                 <option value="max_im_BitsOut">Bits Out</option>
                                 <option value="max_im_BitsPerSecondIn">Bits Per Second In</option>
                                 <option value="max_im_BitsPerSecondOut">Bits Per Second Out</option>
-                                
+                                <option value="max_im_Availability">aVAILABILITY</option>
+
                                 <!-- Add more options as needed -->
                             </select>
                         </div>
@@ -137,6 +143,7 @@
                     <!-- Add your graph content here -->
                 </div>
 
+
                 <!-- Table Container -->
                 <div class="container mt-5">
                     <h2>Table</h2>
@@ -154,6 +161,41 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- INFORMATION -->
+                <div class="container mt-5">
+                    <h2>INFO</h2>
+                    <table class="table table-bordered" id="infoTable">
+                        <!-- <thead>
+                            <tr>
+                                <th>Start Time</th>
+                            </tr>
+                            <tr>
+                                <th>End Time</th>
+                            </tr>
+                            <tr>
+                                <th>Group</th>
+                            </tr>
+                        </thead> -->
+                        <tbody id="infoBody">
+                          <tr>
+                              <th>Start Time</th>
+                              <td id="infoST">Some really long time that defo wont fit</td>
+                          </tr>
+                          <tr>
+                              <th>End Time</th>
+                              <td id="infoET">00100</td>
+                          </tr>
+                          <tr>
+                              <th>Group</th>
+                              <td id="infoG">BIP</td>
+                          </tr>
+                          <tr>
+                              <th>Number of devices</th>
+                              <td id="infoND">5</td>
+                          </tr>
+                        </tbody>
+                    </table>
+                </div>
             </main>
         </div>
     </div>
@@ -162,5 +204,9 @@
       </script>
     <!-- Bootstrap Scripts -->
     </div>
+    <footer class="bg-light">
+      version 1.1 <br>
+      <a href="https://github.com/0xFF00XX/DataEdge/tree/main/API">GitHub project</a>
+    </footer>
 </body>
 </html>
