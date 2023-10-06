@@ -13,6 +13,8 @@ Project uses multiple CDN links, access to internet required, unless all necessa
 
 - python3 
 - itnernet access (optional with local CDN libs)
+- connection to DA
+
 ## Configuration
 
 create `config.py` file in the same directory.
