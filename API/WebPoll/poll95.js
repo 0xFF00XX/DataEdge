@@ -18,7 +18,7 @@ const startFlatInput = document.getElementById("flatStart");
 const endFlatInput = document.getElementById("flatEnd");
 
 //IP OF LOCAL MACHINE
-const ip = "10.0.0.236";
+const ip = "10.0.0.235";
 const port = "8000";
 
 //error messages
@@ -200,16 +200,18 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
         //ERROR NO DATA
         console.error("No data");
         graph(data, metricValue);
-        setTable("null",0)
+        setTable("null",0);
+        setInfoTable(0, "null")
       }
       else{
 
         graph(data, metricValue)
-
         //Sort data to process it in the table for max-min and percentiles
         data.sort((a, b) => a[metricValue.value] - b[metricValue.value]);
         // console.log(data);
         setTable(data, metricValue);
+
+        setInfoTable(groupValue, data)
       }
 
 
@@ -227,10 +229,77 @@ document.getElementById("submitForm").addEventListener("submit", function(event)
 
 
 });
-
 //
 //END of submit action
 //
+
+
+//
+//set INFO table
+//
+function setInfoTable(group, data ){
+  var infoG = document.getElementById("infoG");
+  var infoND = document.getElementById("infoND");
+  var infoST = document.getElementById("infoST");
+  var infoET = document.getElementById("infoET");
+
+
+  if (data === "null"){
+    infoST.innerHTML = "no data";
+    infoET.innerHTML = "";
+    infoND.innerHTML = "";
+    infoG.innerHTML = "";
+  }
+  else{
+    infoST.innerHTML = new Date(data[0].Timestamp * 1000);
+    infoET.innerHTML = new Date(data[data.length - 1].Timestamp * 1000);
+  }
+
+
+
+
+  return new Promise((resolve, reject) => {
+    //ip
+
+    const url = "http://" + ip + ":" + port + "/odata/api/groups?$format=json&$select=Name,DisplayName,MemberCount,DeviceCount,GroupChildren";
+    fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+
+      //get groups
+      array = data.d.results;
+      console.log(array);
+      // Use the find method to find the element with the matching "name" property
+      var foundElement = array.find(function(element) {
+          return element.Name === group;});
+      // if found hcange table
+      if (foundElement){
+        infoG = document.getElementById("infoG");
+        infoG.innerHTML = foundElement.Name;
+
+        infoND = document.getElementById("infoND");
+        infoND.innerHTML = foundElement.DeviceCount;
+      }
+
+
+
+
+
+
+    })
+    .catch(error => {
+      reject(error); // Reject the promise with an error if fetch fails
+    });
+  });
+}
+//
+//end INFO table
+//
+
 
 
 //
@@ -284,6 +353,7 @@ function setTable(data, metric){
     cell4.innerHTML = perc95;
     cell5.innerHTML = perc98;
   }
+
 
 }
 //END of settable
