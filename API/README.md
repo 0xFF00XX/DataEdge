@@ -68,4 +68,17 @@ Website is now live and accessible on http://**IP**:**Port**
 - click "Submit"
 
 
+#Future Updates
+
+1. Implement group selection using GroupChilren data (now can only add groups manually through `HTML` code).
+	- add 'Other...' option in group selection to add more
+	- create pop up that will pull and display all groups.
+	- add to favourites to have needed groups in quick access. 
+1. More extensive error messages.
+	- if Timestamp misses few dates - mark them as 'data unavailable'
+	- if group has no devices etc
+1. ability to select multiple groups or metrics. 
+1. ability to specify rounding
+
+
 
