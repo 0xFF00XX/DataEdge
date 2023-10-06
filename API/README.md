@@ -12,7 +12,7 @@ Project uses multiple CDN links, access to internet required, unless all necessa
 ## Pre-requisites
 
 - python3 
-- itnernet access (optional with local CDN libs)
+- internet access (optional with local CDN libs)
 - connection to DA
 
 ## Configuration
