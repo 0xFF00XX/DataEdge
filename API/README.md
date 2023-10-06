@@ -68,7 +68,7 @@ Website is now live and accessible on http://**IP**:**Port**
 - click "Submit"
 
 
-#Future Updates
+# Future Updates
 
 1. Implement group selection using GroupChilren data (now can only add groups manually through `HTML` code).
 	- add 'Other...' option in group selection to add more
